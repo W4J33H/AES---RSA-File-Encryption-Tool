@@ -1,0 +1,135 @@
+#!/bin/bash
+
+# Function to display welcome message
+show_welcome() {
+    echo "Welcome to File Encryption Tool!"
+    echo "Select an option:"
+    echo "1. Encrypt a file using AES"
+    echo "2. Decrypt a file using AES"
+    echo "3. Generate RSA keys"
+    echo "4. Encrypt a file using RSA"
+    echo "5. Decrypt a file using RSA"
+    echo "6. Exit"
+}
+
+# Function to encrypt a file using AES
+encrypt_file_aes() {
+    read -p "Enter the file path to encrypt: " file_path
+    if [ ! -f "$file_path" ]; then
+        echo "Error: File does not exist. Exiting."
+        return
+    fi
+
+    read -p "Enter the output encrypted file path: " output_path
+    read -s -p "Enter encryption password: " password
+    echo
+    openssl enc -aes-256-cbc -salt -in "$file_path" -out "$output_path" -pass pass:"$password"
+
+    echo "File encrypted successfully. Output file: $output_path"
+}
+
+# Function to decrypt a file using AES
+decrypt_file_aes() {
+    read -p "Enter the file path to decrypt: " file_path
+    if [ ! -f "$file_path" ]; then
+        echo "Error: File does not exist. Exiting."
+        return
+    fi
+
+    read -p "Enter the output decrypted file path: " output_path
+    read -s -p "Enter decryption password: " password
+    echo
+    openssl enc -d -aes-256-cbc -in "$file_path" -out "$output_path" -pass pass:"$password"
+
+    echo "File decrypted successfully. Output file: $output_path"
+}
+
+# Function to generate RSA keys
+generate_rsa_keys() {
+    read -p "Enter the output directory for keys: " output_dir
+    mkdir -p "$output_dir"
+
+    read -p "Enter key size (e.g., 2048, 4096): " key_size
+    openssl genpkey -algorithm RSA -out "$output_dir/private_key.pem" -pkeyopt rsa_keygen_bits:$key_size
+    openssl rsa -pubout -in "$output_dir/private_key.pem" -out "$output_dir/public_key.pem"
+
+    echo "RSA keys generated successfully."
+    echo "Private key: $output_dir/private_key.pem"
+    echo "Public key: $output_dir/public_key.pem"
+}
+
+# Function to encrypt a file using RSA
+encrypt_file_rsa() {
+    read -p "Enter the file path to encrypt: " file_path
+    if [ ! -f "$file_path" ]; then
+        echo "Error: File does not exist. Exiting."
+        return
+    fi
+
+    read -p "Enter the public key file path: " pub_key_path
+    if [ ! -f "$pub_key_path" ]; then
+        echo "Error: Public key file does not exist. Exiting."
+        return
+    fi
+
+    read -p "Enter the output encrypted file path: " output_path
+    openssl rsautl -encrypt -inkey "$pub_key_path" -pubin -in "$file_path" -out "$output_path"
+
+    echo "File encrypted successfully. Output file: $output_path"
+}
+
+# Function to decrypt a file using RSA
+decrypt_file_rsa() {
+    read -p "Enter the file path to decrypt: " file_path
+    if [ ! -f "$file_path" ]; then
+        echo "Error: File does not exist. Exiting."
+        return
+    fi
+
+    read -p "Enter the private key file path: " priv_key_path
+    if [ ! -f "$priv_key_path" ]; then
+        echo "Error: Private key file does not exist. Exiting."
+        return
+    fi
+
+    read -p "Enter the output decrypted file path: " output_path
+    openssl rsautl -decrypt -inkey "$priv_key_path" -in "$file_path" -out "$output_path"
+
+    echo "File decrypted successfully. Output file: $output_path"
+}
+
+# Main script logic
+main() {
+    while true; do
+        show_welcome
+
+        read -p "Enter your choice: " choice
+        case "$choice" in
+            1)
+                encrypt_file_aes
+                ;;
+            2)
+                decrypt_file_aes
+                ;;
+            3)
+                generate_rsa_keys
+                ;;
+            4)
+                encrypt_file_rsa
+                ;;
+            5)
+                decrypt_file_rsa
+                ;;
+            6)
+                echo "Exiting File Encryption Tool."
+                exit 0
+                ;;
+            *)
+                echo "Invalid choice. Please enter a number from 1 to 6."
+                ;;
+        esac
+    done
+}
+
+# Run main function
+mainvvvvvvvv
